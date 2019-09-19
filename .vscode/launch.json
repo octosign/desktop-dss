@@ -5,7 +5,8 @@
             "name": "CodeLens (Launch) - App",
             "request": "launch",
             "mainClass": "me.duras.octosigndss.App",
-            "projectName": "octosign-dss"
+            "projectName": "octosign-dss",
+            "args": "sign C:\\Users\\Jakub\\Documents\\Pohyb_10826081907.pdf"
         }
     ]
 }

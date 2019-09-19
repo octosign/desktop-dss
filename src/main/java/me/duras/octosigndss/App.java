@@ -22,7 +22,7 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
  */
 public class App {
     public static void main(String[] args) throws IOException {
-        DSSDocument document = new FileDocument(new File("document.pdf"));
+        DSSDocument document = new FileDocument(new File(args[1]));
 
         // C:\\Program Files (x86)\\EAC MW klient\\pkcs11_x64.dll
         // /usr/lib/eac_mw_klient/libpkcs11_x64.so
