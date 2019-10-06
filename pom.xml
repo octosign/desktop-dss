@@ -117,36 +117,42 @@
     </pluginManagement>
 
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.1</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <mainClass>me.duras.octosigndss.App</mainClass>
-                </transformer>
-              </transformers>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.2</version>
+          <configuration>
+            <excludes>
+              <exclude>**/log4j.properties</exclude>
+            </excludes>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <mainClass>me.duras.octosigndss.App</mainClass>
+                <classpathPrefix>dependency-jars/</classpathPrefix>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.1.1</version>
+          <executions>
+            <execution>
+              <id>copy-dependencies</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <!-- exclude junit, we need runtime dependency only -->
+                <includeScope>runtime</includeScope>
+                <outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
 
       <plugin>
         <groupId>com.igormaznitsa</groupId>
@@ -181,6 +187,13 @@
             <configuration>
               <output>${project.build.directory}${file.separator}jdeps.out</output>
               <options>
+                <option>--class-path</option>
+                <option>./target/dependency-jars/*</option>
+                <option>-R</option>
+                <option>--multi-release</option>
+                <option>11</option>
+                <option>-f</option>
+                <option>.*jar</option>
                 <option>${project.build.directory}${file.separator}${project.build.finalName}.jar</option>
               </options>
             </configuration>
@@ -192,7 +205,6 @@
               <goal>jlink</goal>
             </goals>
             <configuration>
-              <jdepsReportPath>${project.build.directory}${file.separator}jdeps.out</jdepsReportPath>
               <output>${project.build.directory}${file.separator}preparedJDK</output>
               <addModules>
                 <module>java.compiler</module>
@@ -201,6 +213,8 @@
                 <option>--compress=2</option>
                 <option>--no-header-files</option>
                 <option>--no-man-pages</option>
+                <option>--add-modules</option>
+                <option>java.base,java.xml,java.desktop,java.naming,java.datatransfer,java.logging,jdk.crypto.cryptoki</option>
               </options>
             </configuration>
           </execution>
