@@ -20,4 +20,4 @@ jobs:
       with:
         java-version: 1.11
     - name: Call dist
-      run: ./dist.sh
+      run: bash ./dist.sh
