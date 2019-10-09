@@ -5,3 +5,5 @@ version: 1.0-SNAPSHOT
 author: Jakub Ďuraš <jakub@duras.me>
 license: MIT
 exec: ./jdk/bin/java.exe -jar ./sign.jar
+build: bash ./dist.sh
+buildDir: ./dist

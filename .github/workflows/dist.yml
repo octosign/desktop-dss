@@ -21,10 +21,5 @@ jobs:
       with:
         java-version: 1.11
 
-    - name: Call dist
+    - name: Call dist (test & build)
       run: bash ./dist.sh
-
-    - uses: actions/upload-artifact@master
-      with:
-        name: dist-${{ matrix.os }}
-        path: ./tarfile.tar.xz
