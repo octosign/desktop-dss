@@ -22,8 +22,10 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
  */
 public class App {
     public static void main(String[] args) throws IOException {
-        DSSDocument document = new FileDocument(new File(args[1]));
+        File fileToSign = new File(args[1]);
+        DSSDocument document = new FileDocument(fileToSign);
 
+        // TODO: Try automatically
         // C:\\Program Files (x86)\\EAC MW klient\\pkcs11_x64.dll
         // /usr/lib/eac_mw_klient/libpkcs11_x64.so
         try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(
@@ -69,7 +71,7 @@ public class App {
             // the previous step.
             DSSDocument signedDocument = service.signDocument(document, parameters, signatureValue);
 
-            signedDocument.save("document-signed.pdf");
+            signedDocument.save(fileToSign.getAbsolutePath().replace(".pdf", "-signed.pdf"));
         }
     }
 }

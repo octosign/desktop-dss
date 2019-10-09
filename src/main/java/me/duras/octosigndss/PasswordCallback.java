@@ -6,9 +6,9 @@ public class PasswordCallback implements PasswordInputCallback {
 
     @Override
     public char[] getPassword() {
-        System.out.println("Getting password");
+        // TODO: Implement asking for a password
 
-        return "123".toCharArray();
+        return "TODO".toCharArray();
     }
 
 }
