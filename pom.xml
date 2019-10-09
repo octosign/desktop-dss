@@ -6,7 +6,7 @@
 
   <groupId>me.duras</groupId>
   <artifactId>octosigndss</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0</version>
 
   <name>octosigndss</name>
   <url>https://github.com/durasj/octosign-dss</url>
