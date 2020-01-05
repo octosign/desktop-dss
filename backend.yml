@@ -1,0 +1,8 @@
+name: Advanced electronic signature
+description: Advanced electronic signature usable on PDF and other documents using cryptography. Requires an usable certificate and signing drivers (for example ID cards and readers of EU citizens). Uses Digital Signature Service from European Commission licensed under the LGPL-2.1.
+repository: https://github.com/durasj/octosign-dss
+version: 0.1.0
+author: Jakub Ďuraš <jakub@duras.me>
+license: MIT
+exec: ./jdk/bin/java.exe -jar ./sign.jar
+build: bash -e ./dist.sh
