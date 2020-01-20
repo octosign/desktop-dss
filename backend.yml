@@ -3,6 +3,6 @@ description: Advanced electronic signature usable on PDF and other documents usi
 repository: https://github.com/durasj/octosign-dss
 version: 0.1.0
 author: Jakub Ďuraš <jakub@duras.me>
-license: MIT
+license: GNU Lesser General Public License v2.1
 exec: ./jdk/bin/java.exe -jar ./sign.jar
 build: bash -e ./dist.sh
