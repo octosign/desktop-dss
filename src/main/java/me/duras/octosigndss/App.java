@@ -23,8 +23,7 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 public class App {
     public static void main(String[] args) throws IOException {
         if (args[0].equals("meta")) {
-            System.err.println("Meta operation is not yet supported");
-            System.exit(1);
+            App.meta();
         } else if (args[0].equals("sign")) {
             App.sign(args[1]);
         } else if (args[0].equals("verify")) {
@@ -34,6 +33,23 @@ public class App {
             System.err.println("Unsupported operation " + args[0]);
             System.exit(1);
         }
+    }
+
+    private static void meta() {
+        String pkcsDllPath = App.findPkcsDllPath();
+
+        System.out.println("--RESULT--");
+        if (pkcsDllPath == null) {
+            System.out.println("Couldn't automatically configure. [More info](link)");
+        } else {
+            System.out.println("OK");
+        }
+
+        String defaultDllPath = pkcsDllPath == null ? "" : pkcsDllPath;
+        System.out.println("SUPPORTS:application/pdf");
+        System.out.println("OPTIONS:dllPath\"PKCS11 library path\"(\"" + defaultDllPath + "\")");
+        System.out.println("--RESULT--");
+        System.exit(0);
     }
 
     private static void sign(String filePath) throws IOException {
@@ -90,6 +106,7 @@ public class App {
 
             signedDocument.save(fileToSign.getAbsolutePath().replace(".pdf", "-signed.pdf"));
         }
+        System.exit(0);
     }
 
     private static String findPkcsDllPath() {
