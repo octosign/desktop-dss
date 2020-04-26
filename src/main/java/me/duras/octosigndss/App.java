@@ -3,6 +3,7 @@ package me.duras.octosigndss;
 import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Scanner;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.SignatureLevel;
@@ -21,7 +22,14 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
  * DSS signing backend app
  */
 public class App {
+    private static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) throws IOException {
+        if (args.length < 1) {
+            System.err.println("One of the operations is required: sign, verify, meta.");
+            System.exit(1);
+        }
+
         if (args[0].equals("meta")) {
             App.meta();
         } else if (args[0].equals("sign")) {
@@ -40,22 +48,30 @@ public class App {
 
         System.out.println("--RESULT--");
         if (pkcsDllPath == null) {
-            System.out.println("Couldn't automatically configure. [More info](link)");
+            System.out.println("Autoconfiguration failed. Check Settings and Help.");
         } else {
             System.out.println("OK");
         }
 
         String defaultDllPath = pkcsDllPath == null ? "" : pkcsDllPath;
         System.out.println("SUPPORTS:application/pdf");
-        System.out.println("OPTIONS:dllPath\"PKCS11 library path\"(\"" + defaultDllPath + "\")");
+        System.out.println("OPTIONS:dllPath\"PKCS #11 Library Path\"(\"" + defaultDllPath
+                + "\") tspUrl\"Timestamping Server URL\"(\"http://timestamp.digicert.com\")");
         System.out.println("--RESULT--");
         System.exit(0);
     }
 
     private static void sign(String filePath) throws IOException {
-        String pkcsDllPath = App.findPkcsDllPath();
+        String pkcsDllPath = App.option("dllPath");
+        String tspUrl = App.option("tspUrl");
+
         if (pkcsDllPath == null) {
-            System.err.println("Can not find supported PKCS DLL.");
+            System.err.println("PKCS #11 library path is not configured.");
+            System.exit(1);
+        }
+
+        if (tspUrl == null) {
+            System.err.println("Timestamping server URL is not configured.");
             System.exit(1);
         }
 
@@ -88,7 +104,7 @@ public class App {
             PAdESService service = new PAdESService(commonCertificateVerifier);
 
             // Create and set the TSP source
-            OnlineTSPSource tspSource = new OnlineTSPSource("http://timestamp.digicert.com");
+            OnlineTSPSource tspSource = new OnlineTSPSource(tspUrl);
             service.setTspSource(tspSource);
 
             // Get the SignedInfo segment that need to be signed.
@@ -107,6 +123,63 @@ public class App {
             signedDocument.save(fileToSign.getAbsolutePath().replace(".pdf", "-signed.pdf"));
         }
         System.exit(0);
+    }
+
+    private static String prompt(String promptType, String question, String defaultValue) {
+        System.out.println("--PROMPT--");
+        System.out.format("%s\"%s\"(\"%s\")\n", promptType, question, defaultValue);
+        System.out.println("--PROMPT--");
+
+        String answer = null;
+        boolean isAnswer = false;
+        while (scanner.hasNextLine()){
+            String line = scanner.nextLine().trim();
+
+            if (isAnswer == true) {
+                answer = line;
+            }
+
+            if (line.equals("--PROMPT--") && answer == null) {
+                isAnswer = true;
+            }
+
+            if (line.equals("--PROMPT--") && answer != null) {
+                break;
+            }
+        }
+
+        return answer.isEmpty() ? null : answer;
+    }
+
+    private static String option(String id) {
+        System.out.println("--GETOPTION--");
+        System.out.println(id);
+        System.out.println("--GETOPTION--");
+
+        String answer = null;
+        boolean isAnswer = false;
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+
+            System.out.println("GOT: " + line);
+
+            if (isAnswer == true) {
+                answer = line;
+                isAnswer = false;
+            }
+
+            if (line.equals("--GETOPTION--") && answer == null) {
+                isAnswer = true;
+            }
+
+            if (line.equals("--GETOPTION--") && answer != null) {
+                break;
+            }
+        }
+
+        System.out.println("ANSWER IS:" + answer);
+
+        return answer.isEmpty() ? null : answer;
     }
 
     private static String findPkcsDllPath() {
