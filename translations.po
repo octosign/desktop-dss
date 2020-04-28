@@ -21,3 +21,42 @@ msgstr ""
 
 msgid "Can not find supported PKCS DLL."
 msgstr ""
+
+msgid "Autoconfiguration failed. Please check Settings and Help."
+msgstr ""
+
+msgid "PKCS #11 Library Path"
+msgstr ""
+
+msgid "Timestamping Server URL"
+msgstr ""
+
+msgid "PKCS #11 library path is not configured. Please check Settings and Help."
+msgstr ""
+
+msgid "PKCS #11 library does't exist. Please check Settings and Help."
+msgstr ""
+
+msgid "Timestamping server URL is not configured."
+msgstr ""
+
+msgid "Signed file path was not chosen."
+msgstr ""
+
+msgid "Please provide the private key password."
+msgstr ""
+
+msgid "There was an error saving the signed document."
+msgstr ""
+
+msgid "Please pick a certificate for signing"
+msgstr ""
+
+msgid "Key was not chosen."
+msgstr ""
+
+msgid "Communication with device failed."
+msgstr ""
+
+msgid "Using of the PKCS #11 library failed."
+msgstr ""
