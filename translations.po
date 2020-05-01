@@ -60,3 +60,33 @@ msgstr ""
 
 msgid "Using of the PKCS #11 library failed."
 msgstr ""
+
+msgid "Signed by"
+msgstr ""
+
+msgid "Validity"
+msgstr ""
+
+msgid "Date and time"
+msgstr ""
+
+msgid "Qualification"
+msgstr ""
+
+msgid "Chain of trust"
+msgstr ""
+
+msgid "Potential problems"
+msgstr ""
+
+msgid "Valid"
+msgstr ""
+
+msgid "Invalid"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "This is probably due to corrupted installation."
+msgstr ""

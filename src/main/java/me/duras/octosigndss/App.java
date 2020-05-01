@@ -25,7 +25,7 @@ public class App {
         } else if (args[0].equals("sign")) {
             (new OperationSign(scanner)).run(args[1]);
         } else if (args[0].equals("verify")) {
-            (new OperationSign(scanner)).run(args[1]);
+            (new OperationVerify()).run(args[1]);
         } else {
             System.err.println("Unsupported operation " + args[0]);
             System.exit(1);

@@ -11,4 +11,5 @@ cp backend.yml ./dist/
 cp LICENSE ./dist/
 cp -r ./target/preparedJDK ./dist/jdk
 cp -r ./target/dependency-jars ./dist/
+cp ./keystore.p12 ./dist/
 cp ./target/octosigndss*.jar ./dist/sign.jar
