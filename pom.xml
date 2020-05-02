@@ -38,6 +38,7 @@
       <artifactId>dss-signature-remote</artifactId>
       <version>5.6</version>
     </dependency>
+
     <dependency>
       <groupId>eu.europa.ec.joinup.sd-dss</groupId>
       <artifactId>dss-service</artifactId>
@@ -48,6 +49,12 @@
           <groupId>commons-logging</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+      <artifactId>dss-crl-parser-stream</artifactId>
+      <version>5.6</version>
     </dependency>
 
     <dependency>
