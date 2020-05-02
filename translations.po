@@ -90,3 +90,30 @@ msgstr ""
 
 msgid "This is probably due to corrupted installation."
 msgstr ""
+
+msgid "Qualified Electronic Signature"
+msgstr ""
+
+msgid "Qualified Electronic Seal"
+msgstr ""
+
+msgid "Qualified Electronic Signature or Seal"
+msgstr ""
+
+msgid "Advanced Electronic Signature"
+msgstr ""
+
+msgid "Advanced Electronic Seal"
+msgstr ""
+
+msgid "Advanced Electronic Signature or Seal"
+msgstr ""
+
+msgid "Not Advanced Electronic Signature but supported by a Qualified Certificate"
+msgstr ""
+
+msgid "Not Advanced Electronic Signature"
+msgstr ""
+
+msgid "Not applicable"
+msgstr ""
