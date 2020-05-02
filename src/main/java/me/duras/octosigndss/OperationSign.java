@@ -111,6 +111,10 @@ public class OperationSign {
                 System.err.println("There was an error saving the signed document.");
                 System.exit(1);
             }
+
+            System.out.println("--RESULT--");
+            System.out.println(path);
+            System.out.println("--RESULT--");
         } catch (Exception e) {
             System.err.println("Using of the PKCS #11 library failed.");
             System.exit(1);
