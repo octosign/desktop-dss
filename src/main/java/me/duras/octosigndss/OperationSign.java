@@ -20,6 +20,7 @@ import eu.europa.esig.dss.model.ToBeSigned;
 import eu.europa.esig.dss.pades.PAdESSignatureParameters;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
+import eu.europa.esig.dss.token.AbstractKeyStoreTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.Pkcs11SignatureToken;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
@@ -42,7 +43,7 @@ public class OperationSign {
         }
 
         if (!Files.exists(Paths.get(pkcsDllPath))) {
-            System.err.println("PKCS #11 library does't exist. Please check Settings and Help.");
+            System.err.println("PKCS #11 library doesn't exist. Please check Settings and Help.");
             System.exit(1);
         }
 
@@ -121,7 +122,7 @@ public class OperationSign {
         }
     }
 
-    private DSSPrivateKeyEntry getPrivateKey(Request request, Pkcs11SignatureToken token) {
+    private DSSPrivateKeyEntry getPrivateKey(Request request, AbstractKeyStoreTokenConnection token) {
         List<DSSPrivateKeyEntry> keys;
         try {
             keys = token.getKeys();

@@ -2,6 +2,7 @@ package me.duras.octosigndss;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Scanner;
@@ -10,10 +11,9 @@ import java.util.Scanner;
  * DSS signing backend app
  */
 public class App {
-    private static Scanner scanner = new Scanner(System.in);
-
-    public static void main(String[] args) {
-        App.ensureUTF8SystemOut();
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        Scanner scanner = new Scanner(new InputStreamReader(System.in, "UTF-8"));
+        App.ensureUTF8SystemIO();
 
         if (args.length < 1) {
             System.err.println("One of the operations is required: sign, verify, meta.");
@@ -32,9 +32,10 @@ public class App {
         }
     }
 
-    private static void ensureUTF8SystemOut() {
+    private static void ensureUTF8SystemIO() {
         try {
             System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, "UTF-8"));
+            System.setErr(new PrintStream(new FileOutputStream(FileDescriptor.err), true, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new InternalError("VM does not support mandatory encoding UTF-8");
         }

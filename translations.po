@@ -34,7 +34,7 @@ msgstr ""
 msgid "PKCS #11 library path is not configured. Please check Settings and Help."
 msgstr ""
 
-msgid "PKCS #11 library does't exist. Please check Settings and Help."
+msgid "PKCS #11 library doesn't exist. Please check Settings and Help."
 msgstr ""
 
 msgid "Timestamping server URL is not configured."

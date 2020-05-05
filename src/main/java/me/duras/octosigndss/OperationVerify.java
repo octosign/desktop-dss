@@ -32,6 +32,13 @@ public class OperationVerify {
         // See https://github.com/durasj/octosign-dss/issues/8
         Set<String> countries = getDocumentCertificateCountries(document);
 
+        if (countries.size() == 0) {
+            System.out.println("--RESULT--");
+            System.out.println("UNSIGNED");
+            System.out.println("--RESULT--");
+            System.exit(0);
+        }
+
         SignedDocumentValidator documentValidator = SignedDocumentValidator.fromDocument(document);
 
         CertificateVerifier cv = new CommonCertificateVerifier();
@@ -85,7 +92,6 @@ public class OperationVerify {
         System.out.println(status);
         System.out.println(details);
         System.out.println("--RESULT--");
-        System.exit(0);
     }
 
     private TrustedListsCertificateSource getTrustedCertificateSource(Set<String> requiredCountries) {
