@@ -67,7 +67,7 @@ public class TrustLoader {
 
     private DSSFileLoader onlineLoader() {
         FileCacheDataLoader onlineFileLoader = new FileCacheDataLoader();
-        onlineFileLoader.setCacheExpirationTime(24 * 60 * 60 * 1000);
+        onlineFileLoader.setCacheExpirationTime(1);
         onlineFileLoader.setDataLoader(dataLoader());
         onlineFileLoader.setFileCacheDirectory(tlCacheDirectory());
         return onlineFileLoader;
@@ -81,7 +81,7 @@ public class TrustLoader {
     }
 
     private CommonsDataLoader dataLoader() {
-        return new CommonsDataLoader();
+        return new ProxiedCommonsDataLoader();
     }
 
     private CacheCleaner cacheCleaner() {

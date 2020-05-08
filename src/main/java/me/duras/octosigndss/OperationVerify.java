@@ -14,6 +14,7 @@ import eu.europa.esig.dss.service.crl.OnlineCRLSource;
 import eu.europa.esig.dss.service.http.commons.CommonsDataLoader;
 import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
 import eu.europa.esig.dss.simplereport.SimpleReport;
+import eu.europa.esig.dss.spi.client.http.IgnoreDataLoader;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.CertificateVerifier;
@@ -21,6 +22,8 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.executor.ValidationLevel;
 import eu.europa.esig.dss.validation.reports.Reports;
+import me.duras.octosigndss.trust.IgnoreCrlSource;
+import me.duras.octosigndss.trust.IgnoreOcspSource;
 import me.duras.octosigndss.trust.LazyTLValidationJob;
 import me.duras.octosigndss.trust.TrustLoader;
 
@@ -92,6 +95,7 @@ public class OperationVerify {
         System.out.println(status);
         System.out.println(details);
         System.out.println("--RESULT--");
+        System.exit(0);
     }
 
     private TrustedListsCertificateSource getTrustedCertificateSource(Set<String> requiredCountries) {
@@ -103,6 +107,9 @@ public class OperationVerify {
     private Set<String> getDocumentCertificateCountries(DSSDocument document) {
         SignedDocumentValidator documentValidator = SignedDocumentValidator.fromDocument(document);
         CertificateVerifier cv = new CommonCertificateVerifier();
+        cv.setDataLoader(new IgnoreDataLoader());
+        cv.setCrlSource(new IgnoreCrlSource());
+        cv.setOcspSource(new IgnoreOcspSource());
 
         // Dummy certificate source just so that we can proceed
         cv.setTrustedCertSource(new TrustedListsCertificateSource());

@@ -116,6 +116,7 @@ public class OperationSign {
             System.out.println("--RESULT--");
             System.out.println(path);
             System.out.println("--RESULT--");
+            System.exit(0);
         } catch (Exception e) {
             System.err.println("Using of the PKCS #11 library failed.");
             System.exit(1);
