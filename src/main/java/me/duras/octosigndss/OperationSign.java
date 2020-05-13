@@ -71,6 +71,7 @@ public class OperationSign {
             // TODO: Add trust for -LT/-LTA in the future
             CommonCertificateVerifier commonCertificateVerifier = new CommonCertificateVerifier();
 
+            // TODO: Improve type safety
             AbstractSignatureService service = null;
             AbstractSignatureParameters parameters = null;
             if (fileToSign.getName().endsWith(".pdf")) {
