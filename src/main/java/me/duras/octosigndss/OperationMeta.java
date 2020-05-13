@@ -15,7 +15,6 @@ public class OperationMeta {
         }
 
         String defaultDllPath = pkcsDllPath == null ? "" : pkcsDllPath;
-        System.out.println("SUPPORTS:application/pdf");
         System.out.println("OPTIONS:dllPath\"PKCS #11 Library Path\"(\"" + defaultDllPath
                 + "\") tspUrl\"Timestamping Server URL\"(\"http://timestamp.digicert.com\")");
         System.out.println("--RESULT--");

@@ -29,6 +29,13 @@ import me.duras.octosigndss.trust.TrustLoader;
 
 public class OperationVerify {
     public void run(String filePath) {
+        if (!(filePath.endsWith(".pdf") || filePath.endsWith(".xml") || filePath.endsWith(".asice") || filePath.endsWith(".sce"))) {
+            System.out.println("--RESULT--");
+            System.out.println("UNKNOWN");
+            System.out.println("--RESULT--");
+            System.exit(0);
+        }
+
         DSSDocument document = new FileDocument(filePath);
 
         // TODO: Find out how we can do this without using two document validators
