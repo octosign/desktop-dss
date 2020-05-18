@@ -6,16 +6,11 @@ import java.util.Locale;
 public class OperationMeta {
     public void run() {
         String pkcsDllPath = this.findPkcsDllPath();
+        String defaultDllPath = pkcsDllPath == null ? "" : pkcsDllPath;
 
         System.out.println("--RESULT--");
-        if (pkcsDllPath == null) {
-            System.out.println("Autoconfiguration failed. Plase check Settings and Help.");
-        } else {
-            System.out.println("OK");
-        }
-
-        String defaultDllPath = pkcsDllPath == null ? "" : pkcsDllPath;
-        System.out.println("OPTIONS:dllPath\"PKCS #11 Library Path\"(\"" + defaultDllPath
+        System.out.println("OK");
+        System.out.println("OPTIONS:pkcsPath\"PKCS #11/#12 Path\"(\"" + defaultDllPath
                 + "\") tspUrl\"Timestamping Server URL\"(\"http://timestamp.digicert.com\")");
         System.out.println("--RESULT--");
         System.exit(0);

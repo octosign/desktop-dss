@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+import java.security.KeyStore.PasswordProtection;
 
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
@@ -28,7 +29,9 @@ import eu.europa.esig.dss.service.tsp.OnlineTSPSource;
 import eu.europa.esig.dss.signature.AbstractSignatureService;
 import eu.europa.esig.dss.token.AbstractKeyStoreTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
+import eu.europa.esig.dss.token.MSCAPISignatureToken;
 import eu.europa.esig.dss.token.Pkcs11SignatureToken;
+import eu.europa.esig.dss.token.Pkcs12SignatureToken;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.xades.XAdESSignatureParameters;
 import eu.europa.esig.dss.xades.signature.XAdESService;
@@ -42,118 +45,147 @@ public class OperationSign {
 
     public void run(String filePath) {
         Request request = new Request(scanner);
-        String pkcsDllPath = request.option("dllPath");
+        String pkcsPath = request.option("pkcsPath");
         String tspUrl = request.option("tspUrl");
+        boolean isWindows = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 
-        if (pkcsDllPath == null) {
-            System.err.println("PKCS #11 library path is not configured. Please check Settings and Help.");
+        if (!isWindows && pkcsPath == null) {
+            System.err.println("PKCS #11/#12 path is not configured. Please check Settings and Help.");
             System.exit(1);
         }
 
-        if (!Files.exists(Paths.get(pkcsDllPath))) {
-            System.err.println("PKCS #11 library doesn't exist. Please check Settings and Help.");
-            System.exit(1);
-        }
-
-        if (tspUrl == null) {
-            System.err.println("Timestamping server URL is not configured.");
+        if (pkcsPath != null && !Files.exists(Paths.get(pkcsPath))) {
+            System.err.println("PKCS #11/#12 path doesn't exist. Please check Settings and Help.");
             System.exit(1);
         }
 
         File fileToSign = new File(filePath);
         DSSDocument document = new FileDocument(fileToSign);
+        String outputPath = null;
 
-        // TODO: Try different slots and give a choice if more than one works
-        try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(pkcsDllPath, new PasswordCallback(request), 1)) {
-            DSSPrivateKeyEntry privateKey = this.getPrivateKey(request, token);
+        boolean isPkcs12 = pkcsPath != null && (pkcsPath.endsWith(".p12") || pkcsPath.endsWith(".pfx"));
+        if (isPkcs12) {
+            // TODO: Can we check if file has no password so we don't ask for empty password?
+            PasswordCallback callback = new PasswordCallback(request);
+            PasswordProtection password = new PasswordProtection(callback.getPassword());
 
-            // Create common certificate verifier
-            // TODO: Add trust for -LT/-LTA in the future
-            CommonCertificateVerifier commonCertificateVerifier = new CommonCertificateVerifier();
-
-            // TODO: Improve type safety
-            AbstractSignatureService service = null;
-            AbstractSignatureParameters parameters = null;
-            if (fileToSign.getName().endsWith(".pdf")) {
-                parameters = new PAdESSignatureParameters();
-                // We choose the level of the signature (-B, -T, -LT, -LTA).
-                parameters.setSignatureLevel(SignatureLevel.PAdES_BASELINE_T);
-                parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
-                parameters.setSigningCertificate(privateKey.getCertificate());
-                parameters.setCertificateChain(privateKey.getCertificateChain());
-
-                service = new PAdESService(commonCertificateVerifier);
-            } else if (fileToSign.getName().endsWith(".xml")) {
-                parameters = new XAdESSignatureParameters();
-                // We choose the level of the signature (-B, -T, -LT, -LTA).
-                parameters.setSignatureLevel(SignatureLevel.XAdES_BASELINE_T);
-                parameters.setSignaturePackaging(SignaturePackaging.ENVELOPED);
-                parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
-                parameters.setSigningCertificate(privateKey.getCertificate());
-                parameters.setCertificateChain(privateKey.getCertificateChain());
-
-                service = new XAdESService(commonCertificateVerifier);
-            } else {
-                ASiCWithCAdESSignatureParameters asicParameters = new ASiCWithCAdESSignatureParameters();
-                // We choose the level of the signature (-B, -T, -LT, -LTA).
-                asicParameters.setSignatureLevel(SignatureLevel.CAdES_BASELINE_T);
-                asicParameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
-                asicParameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
-                asicParameters.setSigningCertificate(privateKey.getCertificate());
-                asicParameters.setCertificateChain(privateKey.getCertificateChain());
-                parameters = asicParameters;
-
-                service = new ASiCWithCAdESService(commonCertificateVerifier);
+            try (Pkcs12SignatureToken token = new Pkcs12SignatureToken(pkcsPath, password)) {
+                outputPath = this.sign(token, document, fileToSign, tspUrl, request);
+            } catch (Exception e) {
+                System.err.println("Using of the PKCS #12 file failed.");
+                System.exit(1);
             }
+        } else if (pkcsPath != null) {
+            // TODO: Try different slots and give a choice if more than one works
+            try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(pkcsPath, new PasswordCallback(request), 1)) {
+                outputPath = this.sign(token, document, fileToSign, tspUrl, request);
+            } catch (Exception e) {
+                System.err.println("Using of the PKCS #11 library failed.");
+                System.exit(1);
+            }
+        } else {
+            try (MSCAPISignatureToken token = new MSCAPISignatureToken()) {
+                outputPath = this.sign(token, document, fileToSign, tspUrl, request);
+            } catch (Exception e) {
+                System.err.println("Using of the MS CAPI failed.");
+                System.exit(1);
+            }
+        }
 
+        System.out.println("--RESULT--");
+        System.out.println(outputPath);
+        System.out.println("--RESULT--");
+        System.exit(0);
+    }
+
+    private <Token extends AbstractKeyStoreTokenConnection> String sign(Token token, DSSDocument document, File file,
+            String tspUrl, Request request) {
+        DSSPrivateKeyEntry privateKey = this.getPrivateKey(request, token);
+        boolean useTsp = tspUrl != null;
+
+        // Create common certificate verifier
+        // TODO: Add trust for -LT/-LTA in the future
+        CommonCertificateVerifier commonCertificateVerifier = new CommonCertificateVerifier();
+
+        // TODO: Improve type safety
+        AbstractSignatureService service = null;
+        AbstractSignatureParameters parameters = null;
+        if (file.getName().endsWith(".pdf")) {
+            parameters = new PAdESSignatureParameters();
+            // We choose the level of the signature (-B, -T, -LT, -LTA).
+            parameters.setSignatureLevel(useTsp ? SignatureLevel.PAdES_BASELINE_T : SignatureLevel.PAdES_BASELINE_B);
+            parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+            parameters.setSigningCertificate(privateKey.getCertificate());
+            parameters.setCertificateChain(privateKey.getCertificateChain());
+
+            service = new PAdESService(commonCertificateVerifier);
+        } else if (file.getName().endsWith(".xml")) {
+            parameters = new XAdESSignatureParameters();
+            // We choose the level of the signature (-B, -T, -LT, -LTA).
+            parameters.setSignatureLevel(useTsp ? SignatureLevel.XAdES_BASELINE_T : SignatureLevel.XAdES_BASELINE_B);
+            parameters.setSignaturePackaging(SignaturePackaging.ENVELOPED);
+            parameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+            parameters.setSigningCertificate(privateKey.getCertificate());
+            parameters.setCertificateChain(privateKey.getCertificateChain());
+
+            service = new XAdESService(commonCertificateVerifier);
+        } else {
+            ASiCWithCAdESSignatureParameters asicParameters = new ASiCWithCAdESSignatureParameters();
+            // We choose the level of the signature (-B, -T, -LT, -LTA).
+            asicParameters
+                    .setSignatureLevel(useTsp ? SignatureLevel.CAdES_BASELINE_T : SignatureLevel.CAdES_BASELINE_B);
+            asicParameters.aSiC().setContainerType(ASiCContainerType.ASiC_E);
+            asicParameters.setDigestAlgorithm(DigestAlgorithm.SHA256);
+            asicParameters.setSigningCertificate(privateKey.getCertificate());
+            asicParameters.setCertificateChain(privateKey.getCertificateChain());
+            parameters = asicParameters;
+
+            service = new ASiCWithCAdESService(commonCertificateVerifier);
+        }
+
+        if (useTsp) {
             // Create and set the TSP source
             OnlineTSPSource tspSource = new OnlineTSPSource(tspUrl);
             service.setTspSource(tspSource);
+        }
 
-            // Get the SignedInfo segment that need to be signed.
-            ToBeSigned dataToSign = service.getDataToSign(document, parameters);
+        // Get the SignedInfo segment that need to be signed.
+        ToBeSigned dataToSign = service.getDataToSign(document, parameters);
 
-            // This function obtains the signature value for signed information using the
-            // private key and specified algorithm
-            DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
-            SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, privateKey);
+        // This function obtains the signature value for signed information using the
+        // private key and specified algorithm
+        DigestAlgorithm digestAlgorithm = parameters.getDigestAlgorithm();
+        SignatureValue signatureValue = token.sign(dataToSign, digestAlgorithm, privateKey);
 
-            // We invoke the PAdESService to sign the document with the signature value
-            // obtained in the previous step.
-            DSSDocument signedDocument = service.signDocument(document, parameters, signatureValue);
+        // We invoke the PAdESService to sign the document with the signature value
+        // obtained in the previous step.
+        DSSDocument signedDocument = service.signDocument(document, parameters, signatureValue);
 
-            String path = request.prompt("save", "Save signed file as", fileToSign.getAbsolutePath());
+        String path = request.prompt("save", "Save signed file as", file.getAbsolutePath());
 
-            if (path == null) {
-                System.err.println("Signed file path was not chosen.");
-                System.exit(1);
-            }
-
-            // Make sure file extension is correct
-            if (parameters instanceof ASiCWithCAdESSignatureParameters
-                    && !(path.endsWith(".sce") || path.endsWith(".asice"))) {
-                path += ".sce";
-            } else if (fileToSign.getName().endsWith(".pdf") && !path.endsWith(".pdf")) {
-                path += ".pdf";
-            } else if (fileToSign.getName().endsWith(".xml") && !path.endsWith(".xml")) {
-                path += ".xml";
-            }
-
-            try {
-                signedDocument.save(path);
-            } catch (Exception e) {
-                System.err.println("There was an error saving the signed document.");
-                System.exit(1);
-            }
-
-            System.out.println("--RESULT--");
-            System.out.println(path);
-            System.out.println("--RESULT--");
-            System.exit(0);
-        } catch (Exception e) {
-            System.err.println("Using of the PKCS #11 library failed.");
+        if (path == null) {
+            System.err.println("Signed file path was not chosen.");
             System.exit(1);
         }
+
+        // Make sure file extension is correct
+        if (parameters instanceof ASiCWithCAdESSignatureParameters
+                && !(path.endsWith(".sce") || path.endsWith(".asice"))) {
+            path += ".sce";
+        } else if (file.getName().endsWith(".pdf") && !path.endsWith(".pdf")) {
+            path += ".pdf";
+        } else if (file.getName().endsWith(".xml") && !path.endsWith(".xml")) {
+            path += ".xml";
+        }
+
+        try {
+            signedDocument.save(path);
+        } catch (Exception e) {
+            System.err.println("There was an error saving the signed document.");
+            System.exit(1);
+        }
+
+        return path;
     }
 
     private DSSPrivateKeyEntry getPrivateKey(Request request, AbstractKeyStoreTokenConnection token) {
@@ -161,7 +193,7 @@ public class OperationSign {
         try {
             keys = token.getKeys();
         } catch (Exception e) {
-            System.err.println("Communication with device failed.");
+            System.err.println("Getting signing certificates failed. Please check Settings and Help.");
             System.exit(1);
             return null;
         }

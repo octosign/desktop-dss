@@ -183,7 +183,7 @@
 
               <provider>ADOPT</provider>
               <providerConfig>
-                <release>jdk-11.0.4+11_openj9-0.15.1</release>
+                <release>jdk-11.0.7+10_openj9-0.20.0</release>
                 <arch>x64</arch>
                 <type>jdk</type>
                 <impl>openj9</impl>
@@ -227,7 +227,7 @@
                 <option>--no-header-files</option>
                 <option>--no-man-pages</option>
                 <option>--add-modules</option>
-                <option>java.base,java.xml,java.desktop,java.naming,java.datatransfer,java.logging,jdk.crypto.cryptoki</option>
+                <option>java.base,java.xml,java.desktop,java.naming,java.datatransfer,java.logging,jdk.crypto.cryptoki,jdk.crypto.mscapi</option>
               </options>
             </configuration>
           </execution>

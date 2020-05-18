@@ -11,8 +11,8 @@ public class PasswordCallback implements PasswordInputCallback {
 
     @Override
     public char[] getPassword() {
-        String password = this.request.prompt("password", "Please provide the private key password.", "");
+        String password = this.request.prompt("password", "Please provide the key password.", "");
 
-        return password.toCharArray();
+        return password != null ? password.toCharArray() : "".toCharArray();
     }
 }
