@@ -25,6 +25,31 @@
     </repository>
   </repositories>
 
+  <profiles>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+          <crypto.modules>jdk.crypto.cryptoki,jdk.crypto.mscapi</crypto.modules>
+      </properties>
+    </profile>
+    <profile>
+      <id>unix</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+          <crypto.modules>jdk.crypto.cryptoki</crypto.modules>
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -227,7 +252,7 @@
                 <option>--no-header-files</option>
                 <option>--no-man-pages</option>
                 <option>--add-modules</option>
-                <option>java.base,java.xml,java.desktop,java.naming,java.datatransfer,java.logging,jdk.crypto.cryptoki,jdk.crypto.mscapi</option>
+                <option>java.base,java.xml,java.desktop,java.naming,java.datatransfer,java.logging,${crypto.modules}</option>
               </options>
             </configuration>
           </execution>
