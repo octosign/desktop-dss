@@ -4,5 +4,6 @@ repository: https://github.com/durasj/octosign-dss
 version: 0.1.0
 author: Jakub Ďuraš <jakub@duras.me>
 license: GNU Lesser General Public License v2.1
-exec: ./jdk/bin/java.exe --add-opens jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED --add-opens jdk.crypto.mscapi/sun.security.mscapi=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -jar ./sign.jar
+exec: ./jdk/bin/java --add-opens jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED -jar ./sign.jar
+execWindows: ./jdk/bin/java.exe --add-opens jdk.crypto.cryptoki/sun.security.pkcs11=ALL-UNNAMED --add-opens jdk.crypto.mscapi/sun.security.mscapi=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -jar ./sign.jar
 build: bash -e ./dist.sh
