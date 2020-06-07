@@ -13,13 +13,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: en_US\n"
 
+msgid "Certificate was not chosen."
+msgstr ""
+
 msgid "Advanced electronic signature"
 msgstr ""
 
 msgid "Advanced electronic signature usable on PDF and other documents using cryptography. Requires an usable certificate and signing drivers (for example ID cards and readers of EU citizens). Uses Digital Signature Service from European Commission licensed under the LGPL-2.1."
-msgstr ""
-
-msgid "Can not find supported PKCS DLL."
 msgstr ""
 
 msgid "PKCS #11/#12 Path"
@@ -40,7 +40,7 @@ msgstr ""
 msgid "Please provide the key password."
 msgstr ""
 
-msgid "There was an error saving the signed document."
+msgid "There was an error saving the signed document:"
 msgstr ""
 
 msgid "Please pick a certificate for signing"
@@ -49,16 +49,16 @@ msgstr ""
 msgid "Key was not chosen."
 msgstr ""
 
-msgid "Getting signing certificates failed. Please check Settings and Help."
+msgid "Getting signing certificates failed. Please check Settings and Help. Error:"
 msgstr ""
 
-msgid "Using of the PKCS #11 library failed."
+msgid "Using of the PKCS #11 library failed:"
 msgstr ""
 
-msgid "Using of the PKCS #12 file failed."
+msgid "Using of the PKCS #12 file failed:"
 msgstr ""
 
-msgid "Using of the MS CAPI failed."
+msgid "Using of the MS CAPI failed:"
 msgstr ""
 
 msgid "Signed by"

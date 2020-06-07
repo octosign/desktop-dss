@@ -36,73 +36,83 @@ public class OperationVerify {
             System.exit(0);
         }
 
-        DSSDocument document = new FileDocument(filePath);
+        try {
+            DSSDocument document = new FileDocument(filePath);
 
-        // TODO: Find out how we can do this without using two document validators
-        // See https://github.com/durasj/octosign-dss/issues/8
-        Set<String> countries = getDocumentCertificateCountries(document);
-
-        if (countries.size() == 0) {
+            // TODO: Find out how we can do this without using two document validators
+            // See https://github.com/durasj/octosign-dss/issues/8
+            Set<String> countries = getDocumentCertificateCountries(document);
+    
+            if (countries.size() == 0) {
+                System.out.println("--RESULT--");
+                System.out.println("UNSIGNED");
+                System.out.println("--RESULT--");
+                System.exit(0);
+            }
+    
+            SignedDocumentValidator documentValidator = SignedDocumentValidator.fromDocument(document);
+    
+            CertificateVerifier cv = new CommonCertificateVerifier();
+            // Capability to download resources from AIA
+            cv.setDataLoader(new CommonsDataLoader());
+            // Capability to request OCSP Responders
+            cv.setOcspSource(new OnlineOCSPSource());
+            // Capability to download CRL
+            cv.setCrlSource(new OnlineCRLSource());
+            // Use EU Trusted Certificate Lists
+            cv.setTrustedCertSource(getTrustedCertificateSource(countries));
+            documentValidator.setCertificateVerifier(cv);
+    
+            documentValidator.setValidationLevel(ValidationLevel.TIMESTAMPS);
+    
+            Reports reports = documentValidator.validateDocument();
+    
+            SimpleReport report = reports.getSimpleReport();
+            String details = "";
+            for (String id : report.getSignatureIdList()) {
+                details += "### t{Signed by} " + report.getSignedBy(id) + "\n\n";
+                details += "**t{Validity}**: t{" + getHumanReadableIndication(report.getIndication(id)) + "}\n\n";
+                details += "**t{Date and time}**: " + report.getSigningTime(id) + "\n\n";
+                details += "**t{Qualification}**: t{" + report.getSignatureQualification(id).getLabel() + "}\n\n";
+                details += "**t{Chain of trust}**: " + report.getCertificateChain(id).getCertificate().stream()
+                        .map((cert) -> cert.getQualifiedName()).collect(Collectors.joining(" > ")) + "\n\n";
+    
+                List<String> errors = report.getErrors(id);
+                if (errors.size() > 0) {
+                    details += "**t{Potential problems}**: \n\n";
+                    int errorNumber = 1;
+                    for (String err : errors) {
+                        details += errorNumber + ". " + err + "\n\n";
+                        errorNumber++;
+                    }
+                }
+    
+                details += "\n\n";
+            }
+    
+            String status = "UNKNOWN";
+            if (report.getSignaturesCount() == 0) {
+                status = "UNSIGNED";
+            } else if (report.getSignaturesCount() == report.getValidSignaturesCount()) {
+                status = "SIGNED";
+            } else if (report.getSignaturesCount() > report.getValidSignaturesCount()) {
+                status = "INVALID";
+            }
+    
             System.out.println("--RESULT--");
-            System.out.println("UNSIGNED");
+            System.out.println(status);
+            System.out.println(details);
+            System.out.println("--RESULT--");
+            System.exit(0);
+        } catch (Exception e) {
+            System.err.println("Verifying failed:");
+            System.err.println(e.getMessage());
+
+            System.out.println("--RESULT--");
+            System.out.println("UNKNOWN");
             System.out.println("--RESULT--");
             System.exit(0);
         }
-
-        SignedDocumentValidator documentValidator = SignedDocumentValidator.fromDocument(document);
-
-        CertificateVerifier cv = new CommonCertificateVerifier();
-        // Capability to download resources from AIA
-        cv.setDataLoader(new CommonsDataLoader());
-        // Capability to request OCSP Responders
-        cv.setOcspSource(new OnlineOCSPSource());
-        // Capability to download CRL
-        cv.setCrlSource(new OnlineCRLSource());
-        // Use EU Trusted Certificate Lists
-        cv.setTrustedCertSource(getTrustedCertificateSource(countries));
-        documentValidator.setCertificateVerifier(cv);
-
-        documentValidator.setValidationLevel(ValidationLevel.TIMESTAMPS);
-
-        Reports reports = documentValidator.validateDocument();
-
-        SimpleReport report = reports.getSimpleReport();
-        String details = "";
-        for (String id : report.getSignatureIdList()) {
-            details += "### t{Signed by} " + report.getSignedBy(id) + "\n\n";
-            details += "**t{Validity}**: t{" + getHumanReadableIndication(report.getIndication(id)) + "}\n\n";
-            details += "**t{Date and time}**: " + report.getSigningTime(id) + "\n\n";
-            details += "**t{Qualification}**: t{" + report.getSignatureQualification(id).getLabel() + "}\n\n";
-            details += "**t{Chain of trust}**: " + report.getCertificateChain(id).getCertificate().stream()
-                    .map((cert) -> cert.getQualifiedName()).collect(Collectors.joining(" > ")) + "\n\n";
-
-            List<String> errors = report.getErrors(id);
-            if (errors.size() > 0) {
-                details += "**t{Potential problems}**: \n\n";
-                int errorNumber = 1;
-                for (String err : errors) {
-                    details += errorNumber + ". " + err + "\n\n";
-                    errorNumber++;
-                }
-            }
-
-            details += "\n\n";
-        }
-
-        String status = "UNKNOWN";
-        if (report.getSignaturesCount() == 0) {
-            status = "UNSIGNED";
-        } else if (report.getSignaturesCount() == report.getValidSignaturesCount()) {
-            status = "SIGNED";
-        } else if (report.getSignaturesCount() > report.getValidSignaturesCount()) {
-            status = "INVALID";
-        }
-
-        System.out.println("--RESULT--");
-        System.out.println(status);
-        System.out.println(details);
-        System.out.println("--RESULT--");
-        System.exit(0);
     }
 
     private TrustedListsCertificateSource getTrustedCertificateSource(Set<String> requiredCountries) {

@@ -72,7 +72,8 @@ public class OperationSign {
             try (Pkcs12SignatureToken token = new Pkcs12SignatureToken(pkcsPath, password)) {
                 outputPath = this.sign(token, document, fileToSign, tspUrl, request);
             } catch (Exception e) {
-                System.err.println("Using of the PKCS #12 file failed.");
+                System.err.println("Using of the PKCS #12 file failed:");
+                System.err.println(e.getMessage());
                 System.exit(1);
             }
         } else if (pkcsPath != null) {
@@ -80,14 +81,16 @@ public class OperationSign {
             try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(pkcsPath, new PasswordCallback(request), 1)) {
                 outputPath = this.sign(token, document, fileToSign, tspUrl, request);
             } catch (Exception e) {
-                System.err.println("Using of the PKCS #11 library failed.");
+                System.err.println("Using of the PKCS #11 library failed:");
+                System.err.println(e.getMessage());
                 System.exit(1);
             }
         } else {
             try (MSCAPISignatureToken token = new MSCAPISignatureToken()) {
                 outputPath = this.sign(token, document, fileToSign, tspUrl, request);
             } catch (Exception e) {
-                System.err.println("Using of the MS CAPI failed.");
+                System.err.println("Using of the MS CAPI failed:");
+                System.err.println(e.getMessage());
                 System.exit(1);
             }
         }
@@ -181,7 +184,8 @@ public class OperationSign {
         try {
             signedDocument.save(path);
         } catch (Exception e) {
-            System.err.println("There was an error saving the signed document.");
+            System.err.println("There was an error saving the signed document:");
+            System.err.println(e.getMessage());
             System.exit(1);
         }
 
@@ -193,7 +197,8 @@ public class OperationSign {
         try {
             keys = token.getKeys();
         } catch (Exception e) {
-            System.err.println("Getting signing certificates failed. Please check Settings and Help.");
+            System.err.println("Getting signing certificates failed. Please check Settings and Help. Error:");
+            System.err.println(e.getMessage());
             System.exit(1);
             return null;
         }
