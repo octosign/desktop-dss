@@ -77,8 +77,12 @@ public class OperationSign {
                 System.exit(1);
             }
         } else if (pkcsPath != null) {
-            // TODO: Try different slots and give a choice if more than one works
-            try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(pkcsPath, new PasswordCallback(request), 1)) {
+            // TODO: Get a list of slots with tokens and let user choose
+            // Currently, default slot should be used if the int is negative
+            // We probably have to use with reflection (.getClass().getMethod())
+            // using method C_GetSlotList with true as parameter to get slots with tokens
+            // and C_GetSlotInfo/C_GetTokenInfo for info about these slots
+            try (Pkcs11SignatureToken token = new Pkcs11SignatureToken(pkcsPath, new PasswordCallback(request), -1)) {
                 outputPath = this.sign(token, document, fileToSign, tspUrl, request);
             } catch (Exception e) {
                 System.err.println("Using of the PKCS #11 library failed:");
