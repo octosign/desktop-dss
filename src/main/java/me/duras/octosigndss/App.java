@@ -11,6 +11,13 @@ import java.util.Scanner;
  * DSS signing backend app
  */
 public class App {
+    static {
+        // TODO: Temporary solution for PDFBox logging output
+        // Ideally, we would use slf4j simpleLogger (via custom Log or LogFactory?)
+        // https://github.com/durasj/octosign-dss/issues/10
+        System.setProperty("org.apache.commons.logging.simplelog.defaultlog", "error");
+    }
+
     public static void main(String[] args) throws UnsupportedEncodingException {
         Scanner scanner = new Scanner(new InputStreamReader(System.in, "UTF-8"));
         App.ensureUTF8SystemIO();
