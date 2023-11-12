@@ -15,6 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+    <java.version>11</java.version>
   </properties>
 
   <repositories>
@@ -129,6 +130,14 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
+
+          <configuration>
+            <release>${java.version}</release>
+            <fork>true</fork>
+            <executable>${jlink.jdk.path}/bin/javac</executable>
+            <source>${java.version}</source>
+            <target>${java.version}</target>
+          </configuration>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -195,7 +204,7 @@
       <plugin>
         <groupId>com.igormaznitsa</groupId>
         <artifactId>mvn-jlink-wrapper</artifactId>
-        <version>1.0.3</version>
+        <version>1.2.1</version>
         <executions>
           <execution>
             <id>cache-jdk-11</id>
@@ -206,12 +215,11 @@
               <jdkPathProperty>jlink.jdk.path</jdkPathProperty>
               <jdkCachePath>${project.build.directory}${file.separator}jdkCache</jdkCachePath>
 
-              <provider>ADOPT</provider>
+              <provider>MICROSOFT</provider>
               <providerConfig>
-                <release>jdk-11.0.7+10_openj9-0.20.0</release>
+                <version>11.0.21</version>
                 <arch>x64</arch>
                 <type>jdk</type>
-                <impl>openj9</impl>
               </providerConfig>
 
             </configuration>
@@ -229,7 +237,7 @@
                 <option>./target/dependency-jars/*</option>
                 <option>-R</option>
                 <option>--multi-release</option>
-                <option>11</option>
+                <option>${java.version}</option>
                 <option>-f</option>
                 <option>.*jar</option>
                 <option>${project.build.directory}${file.separator}${project.build.finalName}.jar</option>
@@ -244,6 +252,9 @@
             </goals>
             <configuration>
               <output>${project.build.directory}${file.separator}preparedJDK</output>
+              <modulePaths>
+                  <path>${jlink.jdk.path}${file.separator}jmods</path>
+              </modulePaths>
               <addModules>
                 <module>java.compiler</module>
               </addModules>
